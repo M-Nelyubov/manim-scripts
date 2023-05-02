@@ -15,6 +15,7 @@ The following list of software is recommended for successfully running these scr
 Once all of the software above has been installed, run the following command in a PowerShell terminal to create a video from the scripts file [STA300_scenes.py](./STA300_scenes.py).
 
 ```
+PS C:\Users\yourUsername> cd .\Documents\GitHub\manim-scripts\
 PS C:\Users\yourUsername\Documents\GitHub\manim-scripts> manim .\STA300_scenes.py TRevisited
 ```
 

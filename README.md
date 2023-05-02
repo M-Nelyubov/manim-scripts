@@ -12,7 +12,7 @@ The following list of software is recommended for successfully running these scr
 
 `[Optional]` VS code - code editing software.  [Download](https://code.visualstudio.com/download)
 
-Once all of the software above has been installed, run the following command in a PowerShell terminal to create a video from the scripts file [STA300_scenes.py](./STA300_scenes.py).
+Once all of the software above has been installed and this repository has been copied locally to `~\Documents\GitHub\manim-scripts\`, run the following command in a PowerShell terminal to create a video from the scripts file [STA300_scenes.py](./STA300_scenes.py).
 
 ```
 PS C:\Users\yourUsername> cd .\Documents\GitHub\manim-scripts\

@@ -1,2 +1,8 @@
+# Ignore intermediate and low-quality renders
 videos/*/*/partial_movie_files
 videos/*/480p15
+media/Tex
+media/videos/*/*/partial_movie_files
+
+# Py cache should be ignored
+*.pyc

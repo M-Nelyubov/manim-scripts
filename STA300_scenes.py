@@ -17,7 +17,6 @@ class LineExample(Scene):
         l.put_start_and_end_on(d[4].get_center(), d[7].get_center())
         self.wait()
 
-
 class JointCDFExample(Scene):
     def construct(self):
         axes = Axes(
@@ -149,9 +148,6 @@ class JointCDFExample(Scene):
         # Other coordinate systems you can play around with include
         # ThreeDAxes, NumberPlane, and ComplexPlane.
 
-
-
-
 class GraphNormalExample(Scene):
     def construct(self):
         axes = Axes((-10, 10, 2), (-.1, 0.4, 0.1), height=6, width=10)
@@ -248,7 +244,6 @@ class GraphNormalExample(Scene):
         # self.play(x_tracker.animate.set_value(-2), run_time=3)
         # self.wait()
 
-
 class TDistributions(Scene):
     def construct(self):
         refresh_decay_power = 0.75
@@ -325,7 +320,6 @@ class TDistributions(Scene):
         )
 
         self.wait()
-
 
 class ChiSquares(Scene):
     def construct(self):
@@ -505,115 +499,26 @@ class TRevisited(Scene):
         
         self.wait()
 
+class NormalApproximationBinomial(Scene):
+    def initialize_p_value(self):
+        self.p = 0.5
+        self.upTo = 25
+        self.play_rate = 0.3
 
-# class BinomialApproximation500(Scene):
-#     def construct(self):
-#         refresh_decay_power = 0.75
-#         axes = Axes(
-#             (0, 5, 1), 
-#             (0, 1, 0.2),
-#             tips=False,
-#             axis_config={"include_numbers": True},
-#             # height=6, 
-#             # width=10
-#         )
-#         # axes.add_coordinate_labels(
-#         #     font_size=20,
-#         #     num_decimal_places=1,
-#         # )
-
-#         x_min, x_max, x_step = axes.x_range
-
-#         self.play(Write(axes, lag_ratio=0.01, run_time=1))
-
-#         from scipy.stats import binom, norm
-
-
-#         # z_pdf = axes.plot(
-#         #     lambda x: norm.pdf(x),
-#         #     color=YELLOW,
-#         # )
-
-#         # z_label = axes.get_graph_label(z_pdf, Tex(R"Z"), x_val=0.5)
-
-#         # self.play(Write(z_pdf), Write(z_label))
-
-#         first_n = 1
-#         last_n = 100
-
-#         new_pmf = 
-
-#         new_pdf = axes.plot(
-#             lambda x: binom.pmf(x, first_nu),   # distribution over R.V. x with 1 degree of freedom
-#             color=BLUE,
-#         )
-
-#         new_label = axes.get_graph_label(new_pdf, (R"t_{" + str(first_nu) + "}"), x_val=3.0, direction=UR)
-
-#         new_area = axes.get_area(new_pdf, x_range=t.interval(.95, first_nu))
-
-#         self.wait()
-
-#         self.play(
-#             Write(new_pdf),
-#             Write(new_label),
-#             Write(new_area)
-#         )
-            
-#         # self.add()
-#         self.wait()
-
-
-#         for df in range(first_nu + 1, last_nu + 1):
-#             self.wait(1/(df**refresh_decay_power))
-#             prior_pdf = new_pdf
-#             prior_label = new_label
-#             prior_area  = new_area
-
-#             new_pdf = axes.plot(
-#                 lambda x: t.pdf(x, df),   # distribution over R.V. x with 1 degree of freedom
-#                 color=BLUE,
-#             )
-#             new_label = axes.get_graph_label(new_pdf, (R"t_{"+ str(df) +R"}"), x_val=3.0, direction=UR)
-
-#             new_area = axes.get_area(new_pdf, x_range=np.clip(t.interval(.95, df), x_min, x_max))
-
-#             self.play(
-#                 ReplacementTransform(prior_pdf, new_pdf),
-#                 ReplacementTransform(prior_label, new_label),
-#                 ReplacementTransform(prior_area, new_area),
-#                 run_time = 1/(df**refresh_decay_power)
-#             )
-
-        
-#         self.wait(2)
-#         self.play(
-#             FadeOut(new_pdf),
-#             FadeOut(new_area),
-#             FadeOut(new_label)
-#         )
-
-#         self.play(
-#             FadeOut(axes),
-#             FadeOut(z_pdf),
-#             FadeOut(z_label)
-#         )
-        
-#         self.wait()
-
-class BarChartExample(Scene):
     def construct(self):
-        p = 0.5
+        self.initialize_p_value()
         from scipy.stats import binom, norm
+
+        z_drawn = False
 
         def generateChart(n, p):
             values = [binom.pmf(k, n, p) for k in np.arange(n+1)]
             max_val = round(np.asarray(values).max(), 3)
             new_chart = BarChart(
-                bar_names=np.arange(n+1),
+                bar_names=np.arange(n+1) if n<15 else None,     # Cut off labeling X values after a certain point once there's too many
                 values=values,
                 y_range=[0, max_val, round(max_val / 5, 4)],
-                y_length=6,
+                y_length=5.5,
                 x_length=10,
                 x_axis_config={"font_size": 36},
             )
@@ -625,7 +530,7 @@ class BarChartExample(Scene):
                 (0, max_val, 0.2),
                 tips=False,
                 axis_config={"include_numbers": True},
-                # height=6, 
+                y_length=5.5, 
                 x_length=10 * (n-1) / n
             )
 
@@ -635,27 +540,78 @@ class BarChartExample(Scene):
                 color=YELLOW,
             )
 
-        new_chart, max_val = generateChart(1, p)
-        axes = genX(1, max_val)
-        z_pdf = genZ(axes, 1*p, (p*(1-p))**0.5)
-        self.play(Write(new_chart))
-        self.add(axes, z_pdf)
+        title = Title(
+            # spaces between braces to prevent SyntaxError
+            r"Binomial distribution with $p={" + str(self.p) + "}, n=" + str(1) + "$",
+            include_underline=False,
+            font_size=40,
+        )
 
-        for n in range(2, 21):
+
+        new_chart, max_val = generateChart(1, self.p)
+        axes = genX(1, max_val)
+        z_pdf = genZ(axes, 1*self.p, (self.p*(1-self.p))**0.5)
+        self.play(Write(new_chart), Write(title))
+        # self.add(title)
+
+        for n in range(2, self.upTo):
             old_chart = new_chart
             old_axes  = axes
             old_pdf   = z_pdf
+            old_title = title
 
-            new_chart, max_val = generateChart(n, p)
+            new_chart, max_val = generateChart(n, self.p)
             axes = genX(n, max_val)
-            z_pdf = genZ(axes, mu=n*p, sigma=(n*p*(1-p))**0.5)
+            z_pdf = genZ(axes, mu=n*self.p, sigma=(n*self.p*(1-self.p))**0.5)
 
-
-            self.play(
-                ReplacementTransform(old_chart, new_chart),
-                ReplacementTransform(old_pdf, z_pdf),
-                ReplacementTransform(old_axes, axes)
+            title = Title(
+                # spaces between braces to prevent SyntaxError
+                r"Binomial distribution with $p={" + str(self.p) + "}, n=" + str(n) + "$",
+                include_underline=False,
+                font_size=24,
             )
-            self.wait(1/n)
+
+            if z_drawn:
+                self.play(
+                    ReplacementTransform(old_chart, new_chart, run_time=self.play_rate),
+                    ReplacementTransform(old_title, title, run_time=self.play_rate),
+                    ReplacementTransform(old_pdf, z_pdf, run_time=self.play_rate),
+                )
+            else:
+                self.play(
+                    ReplacementTransform(old_chart, new_chart, run_time=self.play_rate),
+                    ReplacementTransform(old_title, title, run_time=self.play_rate),
+                )
+                # Start drawing the Z approximation once it is considered sufficiently accurate
+                if n*self.p >= 5 and n*(1-self.p) >= 5:
+                    z_drawn = True
+                    self.play(
+                        Write(z_pdf, run_time=1.5),
+                    )
+
+            self.wait(1/n**0.5)
         
+class NormalApproximationBinomial05(NormalApproximationBinomial):
+    def initialize_p_value(self):
+        self.p = 0.05
+        self.upTo = 105
+        self.play_rate = 0.3
+
+class NormalApproximationBinomial25(NormalApproximationBinomial):
+    def initialize_p_value(self):
+        self.p = 0.25
+        self.upTo = 35
+        self.play_rate = 0.3
+
+class NormalApproximationBinomial75(NormalApproximationBinomial):
+    def initialize_p_value(self):
+        self.p = 0.75
+        self.upTo = 35
+        self.play_rate = 0.3
+
+class NormalApproximationBinomial95(NormalApproximationBinomial):
+    def initialize_p_value(self):
+        self.p = 0.95
+        self.upTo = 105
+        self.play_rate = 0.3
 

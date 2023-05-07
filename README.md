@@ -23,3 +23,7 @@ This will create a 1080p video rendering of the scene `TRevisited` from the STA3
 
 [![Chi Squres video](./media/images/STA300_scenes/ChiSquaresExample.png)](./media/videos/STA300_scenes/1080p60/ChiSquares.mp4 "Chi Squares video")
 
+For rapid prototyping, the flags `-p` (play) and `-ql` (quality low) can be used to accelerate render times and play video outputs immediately:
+```
+manim -p -ql STA300_scenes.py ChiSquares
+```

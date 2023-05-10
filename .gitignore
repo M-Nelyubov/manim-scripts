@@ -5,3 +5,4 @@ media/Tex
 
 # Py cache should be ignored
 *.pyc
+*.svg

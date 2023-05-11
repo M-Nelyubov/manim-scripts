@@ -504,19 +504,33 @@ class TRevisited(Scene):
 
 class CollapseZ(ThreeDScene):
     def construct(self):
-        matrix1 = Matrix([
+        matrix_write_time = 0.3   # Seconds to draw a matrix
+
+        matrix1_data = [
             [.01, .02, .03, .04],
             [.02, .03, .04, .05],
             [.01, .01, .02, .02],
             [.03, .02, .01, .01]
-        ]).move_to([0, 0, 1])
-
-        matrix2 = Matrix([
+        ]
+        
+        matrix2_data = [
             [.03, .05, .04, .01],
             [.02, .04, .06, .08],
             [.03, .07, .02, .08],
             [.01, .02, .03, .04]
-        ]).move_to([0, 0, -1])
+        ]
+
+        # Calculate sum of matrixes
+        matrix_sum = []
+        for i in range(len(matrix1_data)):
+            matrix_sum.append([])
+            for j in range(len(matrix1_data[i])):
+                matrix_sum[i].append(matrix1_data[i][j] + matrix2_data[i][j])
+
+
+        matrix1 = Matrix(matrix1_data).move_to([0, 0, 1])
+        matrix2 = Matrix(matrix2_data).move_to([0, 0, -1])
+        matrixS = Matrix(matrix_sum).move_to([0, 0, 0])
         
 
         # must add the matrix
@@ -528,7 +542,27 @@ class CollapseZ(ThreeDScene):
         )
 
         self.play(
-            Write(matrix2)
+            Write(matrix2, run_time = matrix_write_time)
         )
 
         self.wait()
+
+        addition_matrix = Matrix(
+            [["+" for i in range(4)] for j in range(4)],
+            # left_bracket = " ",
+            # right_bracket = " "
+        ).move_to([0,0,0])
+        
+        self.play(
+            Write(addition_matrix, run_time = matrix_write_time)
+        )
+        
+        self.wait(2)
+
+        self.play(
+            ReplacementTransform(addition_matrix, matrixS),
+            ReplacementTransform(matrix1, matrixS),
+            ReplacementTransform(matrix2, matrixS)
+        )
+
+        self.wait(3)

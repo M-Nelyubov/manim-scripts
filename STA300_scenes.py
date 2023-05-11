@@ -499,10 +499,7 @@ class TRevisited(Scene):
         
         self.wait()
 
-
-
-
-class CollapseZ(ThreeDScene):
+class CollapseZ2(ThreeDScene):
     def construct(self):
         matrix_write_time = 0.3   # Seconds to draw a matrix
 
@@ -566,6 +563,93 @@ class CollapseZ(ThreeDScene):
             ReplacementTransform(addition_matrix, matrixS),
             ReplacementTransform(matrix1, matrixS),
             ReplacementTransform(matrix2, matrixS)
+        )
+
+        self.wait(1)
+
+        self.move_camera(
+            phi   = 0 * DEGREES, 
+            # gamma = 10 * DEGREES,
+        )
+
+        self.wait(3)
+
+
+
+
+class CollapseZ3(ThreeDScene):
+    def construct(self):
+        matrix_write_time = 0.3   # Seconds to draw a matrix
+
+        matrix1_data = [
+            [.001, .002, .003],
+            [.006, .005, .004],
+            [.007, .008, .009]
+        ]
+        
+        matrix2_data = [
+            [.07, .06, .01],
+            [.08, .05, .02],
+            [.09, .04, .03]
+        ]
+
+        matrix3_data = [
+            [.03, .01,  .05],
+            [.02, .145, .04],
+            [.07, .06,  .08]
+        ]
+
+        # Calculate sum of matrixes
+        def getSum(matrix1_data, matrix2_data):
+            matrix_sum = []
+            for i in range(len(matrix1_data)):
+                matrix_sum.append([])
+                for j in range(len(matrix1_data[i])):
+                    matrix_sum[i].append(round(matrix1_data[i][j] + matrix2_data[i][j], 5))   # rounded to 5 decimal places to mitigate floating point errors
+            return matrix_sum
+
+        partial_matrix_sum = getSum(matrix1_data, matrix2_data)
+        matrix_sum = getSum(partial_matrix_sum, matrix3_data)
+
+        matrix1 = Matrix(matrix1_data).move_to([0, 0, 2])
+        matrix2 = Matrix(matrix2_data).move_to([0, 0, 0])
+        matrix3 = Matrix(matrix3_data).move_to([0, 0, -2])
+
+
+        matrixS = Matrix(matrix_sum).move_to([0, 0, 0])
+        
+
+        # must add the matrix
+        self.add(matrix1)
+
+        self.move_camera(
+            phi   = 70 * DEGREES, 
+            # gamma = 10 * DEGREES,
+        )
+
+        self.play(
+            Write(matrix2, run_time = matrix_write_time),
+            Write(matrix3, run_time = matrix_write_time)
+        )
+
+        self.wait()
+
+        addition_matrix1 = Tex("+").move_to([0, 0,  1])
+        addition_matrix2 = Tex("+").move_to([0, 0, -1])
+
+        self.play(
+            Write(addition_matrix1, run_time = matrix_write_time),
+            Write(addition_matrix2, run_time = matrix_write_time)
+        )
+        
+        self.wait(2)
+
+        self.play(
+            FadeOut(addition_matrix1),
+            FadeOut(addition_matrix2),
+            ReplacementTransform(matrix1, matrixS),
+            ReplacementTransform(matrix2, matrixS),
+            ReplacementTransform(matrix3, matrixS)
         )
 
         self.wait(1)

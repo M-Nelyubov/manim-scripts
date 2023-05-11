@@ -528,8 +528,8 @@ class CollapseZ(ThreeDScene):
                 matrix_sum[i].append(matrix1_data[i][j] + matrix2_data[i][j])
 
 
-        matrix1 = Matrix(matrix1_data).move_to([0, 0, 1])
-        matrix2 = Matrix(matrix2_data).move_to([0, 0, -1])
+        matrix1 = Matrix(matrix1_data).move_to([0, 0, 1.5])
+        matrix2 = Matrix(matrix2_data).move_to([0, 0, -1.5])
         matrixS = Matrix(matrix_sum).move_to([0, 0, 0])
         
 
@@ -538,7 +538,7 @@ class CollapseZ(ThreeDScene):
 
         self.move_camera(
             phi   = 70 * DEGREES, 
-            gamma = 10 * DEGREES,
+            # gamma = 10 * DEGREES,
         )
 
         self.play(

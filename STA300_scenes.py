@@ -521,12 +521,15 @@ class CollapseZ(ThreeDScene):
         ]
 
         # Calculate sum of matrixes
-        matrix_sum = []
-        for i in range(len(matrix1_data)):
-            matrix_sum.append([])
-            for j in range(len(matrix1_data[i])):
-                matrix_sum[i].append(matrix1_data[i][j] + matrix2_data[i][j])
+        def getSum(matrix1_data, matrix2_data):
+            matrix_sum = []
+            for i in range(len(matrix1_data)):
+                matrix_sum.append([])
+                for j in range(len(matrix1_data[i])):
+                    matrix_sum[i].append(matrix1_data[i][j] + matrix2_data[i][j])
+            return matrix_sum
 
+        matrix_sum = getSum(matrix1_data, matrix2_data)
 
         matrix1 = Matrix(matrix1_data).move_to([0, 0, 1.5])
         matrix2 = Matrix(matrix2_data).move_to([0, 0, -1.5])
@@ -563,6 +566,13 @@ class CollapseZ(ThreeDScene):
             ReplacementTransform(addition_matrix, matrixS),
             ReplacementTransform(matrix1, matrixS),
             ReplacementTransform(matrix2, matrixS)
+        )
+
+        self.wait(1)
+
+        self.move_camera(
+            phi   = 0 * DEGREES, 
+            # gamma = 10 * DEGREES,
         )
 
         self.wait(3)

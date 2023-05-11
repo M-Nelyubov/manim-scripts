@@ -498,3 +498,37 @@ class TRevisited(Scene):
         )
         
         self.wait()
+
+
+
+
+class CollapseZ(ThreeDScene):
+    def construct(self):
+        matrix1 = Matrix([
+            [.01, .02, .03, .04],
+            [.02, .03, .04, .05],
+            [.01, .01, .02, .02],
+            [.03, .02, .01, .01]
+        ]).move_to([0, 0, 1])
+
+        matrix2 = Matrix([
+            [.03, .05, .04, .01],
+            [.02, .04, .06, .08],
+            [.03, .07, .02, .08],
+            [.01, .02, .03, .04]
+        ]).move_to([0, 0, -1])
+        
+
+        # must add the matrix
+        self.add(matrix1)
+
+        self.move_camera(
+            phi   = 70 * DEGREES, 
+            gamma = 10 * DEGREES,
+        )
+
+        self.play(
+            Write(matrix2)
+        )
+
+        self.wait()

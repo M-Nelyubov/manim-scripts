@@ -528,22 +528,25 @@ class CollapseZ2(ThreeDScene):
 
         matrix_sum = getSum(matrix1_data, matrix2_data)
 
-        matrix1 = Matrix(matrix1_data).move_to([0, 0, 1.5])
-        matrix2 = Matrix(matrix2_data).move_to([0, 0, -1.5])
+        matrix1 = Matrix(matrix1_data).move_to([-3,0,0])
+        matrix2 = Matrix(matrix2_data).move_to([ 3,0,0])
         matrixS = Matrix(matrix_sum).move_to([0, 0, 0])
         
 
         self.play(
-            Write(matrix1, run_time=matrix_write_time)
+            Write(matrix1),
+            Write(matrix2)
         )
+
+        self.wait()
 
         self.move_camera(
             phi=70 * DEGREES,
-            # gamma = 10 * DEGREES,
         )
 
         self.play(
-            Write(matrix2, run_time=matrix_write_time)
+            matrix1.animate.move_to([0,0, 1.5]),
+            matrix2.animate.move_to([0,0, -1.5])
         )
 
         self.wait()
@@ -566,7 +569,6 @@ class CollapseZ2(ThreeDScene):
 
         self.move_camera(
             phi   = 0 * DEGREES, 
-            # gamma = 10 * DEGREES,
         )
 
         self.wait(3)

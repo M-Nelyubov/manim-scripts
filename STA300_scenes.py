@@ -533,25 +533,22 @@ class CollapseZ2(ThreeDScene):
         matrixS = Matrix(matrix_sum).move_to([0, 0, 0])
         
 
-        # must add the matrix
-        self.add(matrix1)
+        self.play(
+            Write(matrix1, run_time=matrix_write_time)
+        )
 
         self.move_camera(
-            phi   = 70 * DEGREES, 
+            phi=70 * DEGREES,
             # gamma = 10 * DEGREES,
         )
 
         self.play(
-            Write(matrix2, run_time = matrix_write_time)
+            Write(matrix2, run_time=matrix_write_time)
         )
 
         self.wait()
 
-        addition_matrix = Matrix(
-            [["+" for i in range(4)] for j in range(4)],
-            # left_bracket = " ",
-            # right_bracket = " "
-        ).move_to([0,0,0])
+        addition_matrix = Tex("+").move_to([0, 0, 0])
         
         self.play(
             Write(addition_matrix, run_time = matrix_write_time)
@@ -560,7 +557,7 @@ class CollapseZ2(ThreeDScene):
         self.wait(2)
 
         self.play(
-            ReplacementTransform(addition_matrix, matrixS),
+            Uncreate(addition_matrix),
             ReplacementTransform(matrix1, matrixS),
             ReplacementTransform(matrix2, matrixS)
         )

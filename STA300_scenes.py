@@ -537,18 +537,14 @@ class CollapseZ2(ThreeDScene):
             Write(matrix1),
             Write(matrix2)
         )
-
         self.wait()
 
-        self.move_camera(
-            phi=70 * DEGREES,
-        )
+        self.move_camera(phi=70 * DEGREES)
 
         self.play(
             matrix1.animate.move_to([0,0, 1.5]),
             matrix2.animate.move_to([0,0, -1.5])
         )
-
         self.wait()
 
         addition_matrix = Tex("+").move_to([0, 0, 0])
@@ -556,7 +552,6 @@ class CollapseZ2(ThreeDScene):
         self.play(
             Write(addition_matrix, run_time = matrix_write_time)
         )
-        
         self.wait(2)
 
         self.play(
@@ -564,17 +559,10 @@ class CollapseZ2(ThreeDScene):
             ReplacementTransform(matrix1, matrixS),
             ReplacementTransform(matrix2, matrixS)
         )
-
         self.wait(1)
 
-        self.move_camera(
-            phi   = 0 * DEGREES, 
-        )
-
+        self.move_camera(phi   = 0 * DEGREES)
         self.wait(3)
-
-
-
 
 class CollapseZ3(ThreeDScene):
     def construct(self):
@@ -610,10 +598,9 @@ class CollapseZ3(ThreeDScene):
         partial_matrix_sum = getSum(matrix1_data, matrix2_data)
         matrix_sum = getSum(partial_matrix_sum, matrix3_data)
 
-        matrix1 = Matrix(matrix1_data).move_to([0, 0, 2])
-        matrix2 = Matrix(matrix2_data).move_to([0, 0, 0])
-        matrix3 = Matrix(matrix3_data).move_to([0, 0, -2])
-
+        matrix1 = Matrix(matrix1_data).scale(0.9).move_to([4.2, 0, 0])#2])
+        matrix2 = Matrix(matrix2_data).scale(0.9).move_to([0, 0, 0])
+        matrix3 = Matrix(matrix3_data).scale(0.9).move_to([-4.2, 0, 0]) # -2])
 
         matrixS = Matrix(matrix_sum).move_to([0, 0, 0])
         
@@ -621,16 +608,19 @@ class CollapseZ3(ThreeDScene):
         # must add the matrix
         self.add(matrix1)
 
-        self.move_camera(
-            phi   = 70 * DEGREES, 
-            # gamma = 10 * DEGREES,
-        )
-
         self.play(
             Write(matrix2, run_time = matrix_write_time),
             Write(matrix3, run_time = matrix_write_time)
         )
+        self.wait()
 
+        self.move_camera(phi   = 70 * DEGREES)
+        self.wait()
+
+        self.play(
+            matrix1.animate.move_to([0,0, 2]),
+            matrix3.animate.move_to([0,0,-2])
+        )
         self.wait()
 
         addition_matrix1 = Tex("+").move_to([0, 0,  1])

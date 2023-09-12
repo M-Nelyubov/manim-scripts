@@ -649,3 +649,25 @@ class CollapseZ3(ThreeDScene):
         )
 
         self.wait(3)
+
+class Roll2d6(Scene):
+    ### Start with a grid of the sample space of 2d6 (2023F Chapter 3 Example 3.3)
+    ### Draw ovals around each element of the sample space, transfer it over to the Reals number line
+    # stack them up as a histogram?
+    def construct(self):
+        S = VGroup()
+        for i in range(1,7):
+            for j in range(1,7):
+                S.add(Tex(f"{i},{j}"))
+        S.arrange_in_grid(buff=0.4).move_to(4 * LEFT)
+        
+        num_line = NumberLine(
+            x_range=[1, 13, 1],
+            length=6,
+            include_tip=True,
+            include_numbers=True,
+        ).move_to(RIGHT * 4)
+
+        self.add(S, num_line)
+        
+        self.wait()

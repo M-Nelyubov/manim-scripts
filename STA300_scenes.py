@@ -671,3 +671,51 @@ class Roll2d6(Scene):
         self.add(S, num_line)
         
         self.wait()
+
+        run_time = 1  # Time in seconds for each animation
+
+        priors = {}
+        for i in range(2,13):
+            priors[i]=0
+
+            elems = []
+            for elem in S:
+                d_0, d_1 = elem.tex_string.split(",")
+                X = int(d_0) + int(d_1)
+                if X != i: continue
+                elems.append(elem)
+            
+            anim1 = []
+            anim2 = []
+            for s in elems:
+                frame = SurroundingRectangle(s, buff=0.1)
+
+                point = num_line.number_to_point(i)
+                rect = Rectangle(
+                    height=0.1, 
+                    width=0.1,
+                    color=ORANGE,
+                    fill_color=ORANGE,
+                ).move_to(point + UP * 0.1 * priors[i])  # Shift up by the amount of prior occurances of X
+                
+                priors[i]+=1  # Increment how many times we've seen this
+
+                anim1.append(
+                    Write(frame, run_time=run_time)
+                )
+
+                anim2.append(
+                    ReplacementTransform(frame, rect, run_time=run_time)
+                )
+
+            self.play(
+                *anim1
+            )
+            
+            self.play(
+                *anim2
+            )
+            
+        
+        self.wait(3)
+

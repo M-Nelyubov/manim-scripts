@@ -651,3 +651,42 @@ class CollapseZ3(ThreeDScene):
         self.wait(3)
 
 # The scene Roll2d6 has been moved to a separate file (Roll2d6.py)
+
+class Combinations(Scene):
+    def construct(self):
+        slots = VGroup()
+        chips = VGroup()
+
+        contents = [
+            {
+                "letter": "r",
+                "color": RED,
+                "count": 3
+            },
+            {
+                "letter": "b",
+                "color": BLUE,
+                "count": 2
+            },
+            {
+                "letter": "g",
+                "color": GREEN,
+                "count": 1
+            }
+        ]   
+
+        for chip_type in contents:
+            for i in range(chip_type['count']):
+                slots.add(Text("_").scale(1.2))
+                chips.add(MathTex(f"{chip_type['letter']}_{i}", color=chip_type['color']))
+
+        slots.arrange_in_grid(rows=1)  
+
+        for chip,slot in zip(chips,slots):
+            chip.next_to(slot, direction=UP*0.5)
+
+        self.add(slots)
+        self.play(
+            Write(chips)
+        )
+        self.wait(3)

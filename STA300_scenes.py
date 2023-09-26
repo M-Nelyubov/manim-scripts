@@ -666,12 +666,12 @@ class Combinations(Scene):
             {
                 "letter": "b",
                 "color": BLUE,
-                "count": 2
+                "count": 4
             },
             {
                 "letter": "g",
                 "color": GREEN,
-                "count": 1
+                "count": 5
             }
         ]   
 
@@ -689,4 +689,51 @@ class Combinations(Scene):
         self.play(
             Write(chips)
         )
+        self.wait(3)
+
+class SolveForPdfIntoExpectedValue(Scene):
+    def construct(self):
+        # starting scene:
+        # x f(x)
+        # 1 a
+        # 2 2a
+        # 3 .3
+        # 4 a/2
+        # 5 .1
+
+        steps = [
+            "Find a.  We know that $$\sum \limits_{x=1}^{5} f(x)$$ must be 1"
+        ]
+        step_tex = []
+
+        global step_i
+        step_i = 0
+        def playNextStep():
+            global step_i
+            step = steps[step_i]
+            step_i += 1
+            step = f"Step {step_i}: " + step
+            step = Tex(step).scale(2/3).move_to(RIGHT*4 + UP*2)
+            if len(step_tex):
+                self.play(ReplacementTransform(step_tex[-1], step))
+            else:
+                self.play(Write(step))
+            step_tex.append(step)
+
+        # Knowing sum of f(x) = 1, find a
+        # Knowing f(x) for all X, find E[X]
+        t0 = Table([
+            ["x", "f(x)"],
+            ["1", "a"],
+            ["2", "2a"],
+            ["3", ".3"],
+            ["4", "a/2"],
+            ["5", ".1"],
+        ]).move_to(LEFT*4).scale(0.5)
+
+        self.play(Write(t0))
+
+        playNextStep()
+
+
         self.wait(3)

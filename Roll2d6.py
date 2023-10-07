@@ -34,9 +34,17 @@ class Sum(Scene):
             include_numbers=True,
         ).move_to(RIGHT * 4)
 
-        label = MathTex(self.label(),substrings_to_isolate=["d_1","d_2"]).move_to(UP*3 + RIGHT*2)
-        label.set_color_by_tex("d_1", RED)
-        label.set_color_by_tex("d_2", GREEN)
+        label = self.label()
+        if '--noColor ' in label:
+            substrings_to_isolate=[]    # This particular function doesn't support being colored properly due to being too complex
+            label = label.replace('--noColor ', '')
+        else:
+            substrings_to_isolate=["d_1","d_2"]
+        label = MathTex(label,substrings_to_isolate=substrings_to_isolate).move_to(UP*3 + RIGHT*2)
+
+        if len(substrings_to_isolate):
+            label.set_color_by_tex("d_1", RED)
+            label.set_color_by_tex("d_2", GREEN)
 
         self.add(S, num_line, label)
         
@@ -130,4 +138,12 @@ class One(Sum):
         return "X(d_1,d_2) = 1"
 
 
+class MultipleRulesConstSum(Sum):
+    def randomVariable(self, d1, d2):
+        if d1 <= 4 and d2 <=4:
+            return 4
+        else:
+            return d1 + d2
 
+    def label(self):
+        return r"--noColor X(d_1,d_2) = \begin{cases} 1 & d_1 \leq 4 \cap d_2 \leq 4 \\ d_1 + d_2 & \text{else} \end{cases}"

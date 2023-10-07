@@ -141,9 +141,9 @@ class One(Sum):
 class MultipleRulesConstSum(Sum):
     def randomVariable(self, d1, d2):
         if d1 <= 4 and d2 <=4:
-            return 4
+            return 3
         else:
             return d1 + d2
 
     def label(self):
-        return r"--noColor X(d_1,d_2) = \begin{cases} 1 & d_1 \leq 4 \cap d_2 \leq 4 \\ d_1 + d_2 & \text{else} \end{cases}"
+        return r"--noColor X(d_1,d_2) = \begin{cases} 3 & d_1 \leq 4 \cap d_2 \leq 4 \\ d_1 + d_2 & \text{else} \end{cases}"

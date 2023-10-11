@@ -274,16 +274,44 @@ class RollAdvanced(Scene):
             priors[r_v]+=1  # Increment how many times we've seen this
 
             frame_anim = Write(frame, run_time=run_time)
-            frame_move = ReplacementTransform(frame, rect, run_time=run_time)
+            
+            # move_elem_to_below_rv 
+            temp_tex = MathTex(elem.tex_string).next_to(condition_matrix, DOWN * text_offset)
+            temp_tex[0][0].set_color(RED)     # color dice red and green
+            temp_tex[0][2].set_color(GREEN)
+            move_elem_to_below_rv = ReplacementTransform(frame, temp_tex)
 
-            return frame_anim, frame_move
+            # rule_highlight
+            # first highlight the rule then highlight the output
+            print(f"Accessing rule {rule} of condition matrix of length {len(condition_matrix)}")
+            rule_rect = SurroundingRectangle(condition_matrix[2*rule + 1])
+            rule_highlight = Write(rule_rect)
+            outcome_rect = SurroundingRectangle(condition_matrix[2*rule + 0])
+            outcome_highlight = ReplacementTransform(rule_rect, outcome_rect)
 
-        slow_demo_samples = 3
+            # s_to_r = TODO
+            outcome_text = Tex(r_v).next_to(temp_tex, DOWN * 0)
+            outcome_overwrite_elem = ReplacementTransform(outcome_rect, outcome_text)
+            remove_elem = Unwrite(temp_tex)
+
+            frame_move = ReplacementTransform(outcome_text, rect, run_time=run_time)
+
+            return frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move
+
+        slow_demo_samples = 10
 
         i=0
         for elem in S:
-            frame_anim, frame_move = get_mapping(elem)
+            frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move = get_mapping(elem)
             self.play(frame_anim)
+            self.wait(1)
+            self.play(move_elem_to_below_rv)
+            self.wait(1)
+            self.play(rule_highlight)
+            self.wait(1)
+            self.play(outcome_highlight)
+            self.wait(1)
+            self.play(outcome_overwrite_elem, remove_elem)
             self.wait(1)
             self.play(frame_move)
             self.wait(1)

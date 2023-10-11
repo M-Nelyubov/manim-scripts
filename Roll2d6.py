@@ -295,48 +295,51 @@ class RollAdvanced(Scene):
             remove_elem = Unwrite(temp_tex)
 
             frame_move = ReplacementTransform(outcome_text, rect, run_time=run_time)
+            elem_to_rv = ReplacementTransform(frame, rect, run_time=run_time)
 
-            return frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move
+            return r_v, frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move, elem_to_rv
 
-        slow_demo_samples = 10
+        slow_demo_samples = 7
+
+        fast_anims = [ ]
+        
+        # {
+        #     'highlight_elem': [],
+        #     'elem_to_RV': []
+        # }
 
         i=0
         for elem in S:
-            frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move = get_mapping(elem)
-            self.play(frame_anim)
-            self.wait(1)
-            self.play(move_elem_to_below_rv)
-            self.wait(1)
-            self.play(rule_highlight)
-            self.wait(1)
-            self.play(outcome_highlight)
-            self.wait(1)
-            self.play(outcome_overwrite_elem, remove_elem)
-            self.wait(1)
-            self.play(frame_move)
-            self.wait(1)
-
+            r_v, frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move, elem_to_rv = get_mapping(elem)
+            if i < slow_demo_samples:
+                self.play(frame_anim)
+                self.wait(1)
+                self.play(move_elem_to_below_rv)
+                self.wait(1)
+                self.play(rule_highlight)
+                self.wait(1)
+                self.play(outcome_highlight)
+                self.wait(1)
+                self.play(outcome_overwrite_elem, remove_elem)
+                self.wait(1)
+                self.play(frame_move)
+                self.wait(1)
+            else:
+                fast_anims.append((
+                    r_v, frame_anim, elem_to_rv
+                ))
             i+=1
-            if i >= slow_demo_samples:
-                break
+
+        # evaluate all remaining r_v outcomes in the fast_anims buffer
+        support = list(set([r_v for r_v,fa,etr in fast_anims]))
+        support.sort()
 
 
-        return ""
-    
-        # for i in support:
+        for x in support:
+            frame_anim = [fa for rv,fa,etr in fast_anims if rv == x]
+            elem_to_RV = [etr for rv,fa,etr in fast_anims if rv == x]
 
-        #     elems = []
-        #     for elem in S:
-        #         d_0, d_1 = elem.tex_string.split(",")
-        #         _X = X.rv(int(d_0), int(d_1))
-        #         if _X != i: continue
-        #         elems.append(elem)
-            
-        #     anim1 = []
-        #     anim2 = []
-        #     for s in elems:
-
-        #     self.play(*anim1)
-        #     self.play(*anim2)            
+            self.play(*frame_anim)
+            self.play(*elem_to_RV)            
         
-        # self.wait(3)
+        self.wait(3)

@@ -253,6 +253,7 @@ class RollAdvanced(Scene):
         print(support)
 
         run_time = 1  # Time in seconds for each animation
+        wait_time = 0.25
 
         priors = {}
         for i in support:
@@ -308,35 +309,36 @@ class RollAdvanced(Scene):
         #     'elem_to_RV': []
         # }
 
-        i=0
+        elems_of_interest = ["1,1", "4,4", "6,6", "1,5"]
+        backlog = []
         for elem in S:
-            r_v, frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move, elem_to_rv = get_mapping(elem)
-            if i < slow_demo_samples:
+            if elem.tex_string in elems_of_interest:
+                r_v, frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move, elem_to_rv = get_mapping(elem)
                 self.play(frame_anim)
-                self.wait(1)
+                self.wait(wait_time)
                 self.play(move_elem_to_below_rv)
-                self.wait(1)
+                self.wait(wait_time)
                 self.play(rule_highlight)
-                self.wait(1)
+                self.wait(wait_time)
                 self.play(outcome_highlight)
-                self.wait(1)
+                self.wait(wait_time)
                 self.play(outcome_overwrite_elem, remove_elem)
-                self.wait(1)
+                self.wait(wait_time)
                 self.play(frame_move)
-                self.wait(1)
+                self.wait(wait_time)
             else:
-                fast_anims.append((
-                    r_v, frame_anim, elem_to_rv
-                ))
-            i+=1
+                backlog.append(elem)
+        for elem in backlog:
+                r_v, frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move, elem_to_rv = get_mapping(elem)
+                fast_anims.append((r_v, frame_anim, elem_to_rv))
 
         # evaluate all remaining r_v outcomes in the fast_anims buffer
         support = list(set([r_v for r_v,fa,etr in fast_anims]))
         support.sort()
 
-
+        # Play the two stages of each of the remaining elements at the same time
         for x in support:
-            frame_anim = [fa for rv,fa,etr in fast_anims if rv == x]
+            frame_anim = [fa  for rv,fa,etr in fast_anims if rv == x]
             elem_to_RV = [etr for rv,fa,etr in fast_anims if rv == x]
 
             self.play(*frame_anim)

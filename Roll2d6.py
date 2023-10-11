@@ -280,35 +280,28 @@ class RollAdvanced(Scene):
             temp_tex = MathTex(elem.tex_string).next_to(condition_matrix, DOWN * text_offset)
             temp_tex[0][0].set_color(RED)     # color dice red and green
             temp_tex[0][2].set_color(GREEN)
-            move_elem_to_below_rv = ReplacementTransform(frame, temp_tex)
+            move_elem_to_below_rv = ReplacementTransform(frame, temp_tex, run_time=run_time)
 
             # rule_highlight
             # first highlight the rule then highlight the output
             print(f"Accessing rule {rule} of condition matrix of length {len(condition_matrix)}")
             rule_rect = SurroundingRectangle(condition_matrix[2*rule + 1])
-            rule_highlight = Write(rule_rect)
+            rule_highlight = Write(rule_rect, run_time=run_time)
             outcome_rect = SurroundingRectangle(condition_matrix[2*rule + 0])
-            outcome_highlight = ReplacementTransform(rule_rect, outcome_rect)
+            outcome_highlight = ReplacementTransform(rule_rect, outcome_rect, run_time=run_time)
 
             # s_to_r = TODO
             outcome_text = Tex(r_v).next_to(temp_tex, DOWN * 0)
-            outcome_overwrite_elem = ReplacementTransform(outcome_rect, outcome_text)
-            remove_elem = Unwrite(temp_tex)
+            outcome_overwrite_elem = ReplacementTransform(outcome_rect, outcome_text, run_time=run_time)
+            remove_elem = Unwrite(temp_tex, run_time=run_time)
 
             frame_move = ReplacementTransform(outcome_text, rect, run_time=run_time)
             elem_to_rv = ReplacementTransform(frame, rect, run_time=run_time)
 
             return r_v, frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move, elem_to_rv
 
-        slow_demo_samples = 7
-
         fast_anims = [ ]
         
-        # {
-        #     'highlight_elem': [],
-        #     'elem_to_RV': []
-        # }
-
         elems_of_interest = ["1,1", "4,4", "6,6", "1,5"]
         backlog = []
         for elem in S:
@@ -332,7 +325,7 @@ class RollAdvanced(Scene):
                 r_v, frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move, elem_to_rv = get_mapping(elem)
                 fast_anims.append((r_v, frame_anim, elem_to_rv))
 
-        # evaluate all remaining r_v outcomes in the fast_anims buffer
+        # evaluate all remaining r_v outcomes in the fast_anims buffer, sorted for the sake of looking nice since sets aren't ordered
         support = list(set([r_v for r_v,fa,etr in fast_anims]))
         support.sort()
 

@@ -151,7 +151,7 @@ class MultipleRulesConstSum(Sum):
 
 class ConditionalMapping():
     def __init__(self):
-        pass
+        self.elems_of_interest = []
 
     def rv(self, d1, d2): 
         # returns a tuple (r_val : float, rule : int)
@@ -163,6 +163,9 @@ class ConditionalMapping():
         return []
 
 class ConstOrSum(ConditionalMapping):
+    def __init__(self):
+        self.elems_of_interest = ["1,1", "4,4", "6,6", "1,5"]
+
     def rv(self,d1, d2):
         if d1 <= 4 and d2 <=4:
             return 3, 0
@@ -259,6 +262,12 @@ class RollAdvanced(Scene):
         for i in support:
             priors[i]=0
 
+        # Keep a data structure at the outer level to track the pointers for all the blocks that go onto the number line
+        block_pointers = {}
+        for s in support:
+            block_pointers[s] = []
+
+        # Create all of the relevant animations
         def get_mapping(elem):  # s in S
             d_0, d_1 = elem.tex_string.split(",")
             r_v, rule = X.rv(int(d_0), int(d_1))
@@ -298,18 +307,21 @@ class RollAdvanced(Scene):
             outcome_overwrite_elem = ReplacementTransform(outcome_rect, outcome_text, run_time=run_time)
             remove_elem = Unwrite(temp_tex, run_time=run_time)
 
+            # Final state transitions.  Either the outcome number or the frame around the initial number go onto the number line as a rectangle.
             frame_move = ReplacementTransform(outcome_text, rect, run_time=run_time)
             elem_to_rv = ReplacementTransform(frame, rect, run_time=run_time)
+
+            block_pointers[r_v].append(rect)    # The pointer to the rectangle is kept for future use
 
             return r_v, frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move, elem_to_rv, darken_element_transform
 
         fast_anims = [ ]
         
-        elems_of_interest = ["1,1", "4,4", "6,6", "1,5"]
-        backlog = []
+        
+        backlog = []  # Elements of the support that we are saving for later to play multiple at a time
         # Play the extended animations for all of the high priority elements of interest
         for elem in S:
-            if elem.tex_string in elems_of_interest:
+            if elem.tex_string in X.elems_of_interest:
                 r_v, frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move, elem_to_rv, darken_element_transform = get_mapping(elem)
                 self.play(frame_anim)
                 self.wait(wait_time)
@@ -331,11 +343,11 @@ class RollAdvanced(Scene):
                 fast_anims.append((r_v, frame_anim, elem_to_rv, darken_element_transform))
 
         # evaluate all remaining r_v outcomes in the fast_anims buffer, sorted for the sake of looking nice since sets aren't ordered
-        support = list(set([r_v for r_v,fa,etr,dark in fast_anims]))
-        support.sort()
+        remaining_support = list(set([r_v for r_v,fa,etr,dark in fast_anims]))
+        remaining_support.sort()
 
         # Play the two stages of each of the remaining elements at the same time
-        for x in support:
+        for x in remaining_support:
             frame_anim = [fa   for rv,fa,etr,dark in fast_anims if rv == x]
             elem_to_RV = [etr  for rv,fa,etr,dark in fast_anims if rv == x]
             darkenElem = [dark for rv,fa,etr,dark in fast_anims if rv == x]
@@ -343,4 +355,39 @@ class RollAdvanced(Scene):
             self.play(*frame_anim)
             self.play(*elem_to_RV, *darkenElem)
         
+        self.wait(1)
+
+        # Drop down all of the pmf cells into a pmf table
+
+        # Draw the pmf table
+        t1 = MathTable(
+            [[str(s) for s in support], [("\\frac{?}{?}") for _ in support]],
+            row_labels=[MathTex("X"), MathTex("f_X(x)")],
+            include_outer_lines=True).scale(1.4/3.0).move_to(DOWN*2 + RIGHT*3)
+
+        self.play(Write(t1, run_time=run_time))
+
+        # Go over each RV support value,
+            # Dropping it into the table
+        distribution = t1.get_rows()[1]
+        for i in range(len(support)):
+            x = support[i]
+            blank = distribution[1+i]  # 1 offset for column name
+            ctr = blank.get_center()
+            print(f"Blank {i} center coordinates: {ctr}")
+            fx = MathTex("\\frac{" + str(len(block_pointers[x])) + "}{36}").move_to(ctr).scale(1.3/3)
+            animations = [
+                # ReplacementTransform(blank, fx)
+                Unwrite(blank, run_time=run_time/2)
+            ]
+            for bp in block_pointers[x]:
+                darker_elem = bp.copy()
+                darker_elem.color = DARK_BROWN
+
+                animations.append(ReplacementTransform(bp, fx, run_time=run_time))
+                animations.append(Write(darker_elem, run_time=run_time))
+
+            self.play(*animations)
+            self.wait(1/4)
+
         self.wait(3)

@@ -281,6 +281,9 @@ class RollAdvanced(Scene):
             temp_tex[0][0].set_color(RED)     # color dice red and green
             temp_tex[0][2].set_color(GREEN)
             move_elem_to_below_rv = ReplacementTransform(frame, temp_tex, run_time=run_time)
+            darker_elem = elem.copy()
+            darker_elem.color = DARK_GRAY
+            darken_element_transform = ReplacementTransform(elem, darker_elem, run_time=run_time)
 
             # rule_highlight
             # first highlight the rule then highlight the output
@@ -290,7 +293,7 @@ class RollAdvanced(Scene):
             outcome_rect = SurroundingRectangle(condition_matrix[2*rule + 0])
             outcome_highlight = ReplacementTransform(rule_rect, outcome_rect, run_time=run_time)
 
-            # s_to_r = TODO
+            # transform the highlighted random variable formula into the desired number
             outcome_text = Tex(r_v).next_to(temp_tex, DOWN * 0)
             outcome_overwrite_elem = ReplacementTransform(outcome_rect, outcome_text, run_time=run_time)
             remove_elem = Unwrite(temp_tex, run_time=run_time)
@@ -298,18 +301,19 @@ class RollAdvanced(Scene):
             frame_move = ReplacementTransform(outcome_text, rect, run_time=run_time)
             elem_to_rv = ReplacementTransform(frame, rect, run_time=run_time)
 
-            return r_v, frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move, elem_to_rv
+            return r_v, frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move, elem_to_rv, darken_element_transform
 
         fast_anims = [ ]
         
         elems_of_interest = ["1,1", "4,4", "6,6", "1,5"]
         backlog = []
+        # Play the extended animations for all of the high priority elements of interest
         for elem in S:
             if elem.tex_string in elems_of_interest:
-                r_v, frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move, elem_to_rv = get_mapping(elem)
+                r_v, frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move, elem_to_rv, darken_element_transform = get_mapping(elem)
                 self.play(frame_anim)
                 self.wait(wait_time)
-                self.play(move_elem_to_below_rv)
+                self.play(move_elem_to_below_rv, darken_element_transform)
                 self.wait(wait_time)
                 self.play(rule_highlight)
                 self.wait(wait_time)
@@ -321,20 +325,22 @@ class RollAdvanced(Scene):
                 self.wait(wait_time)
             else:
                 backlog.append(elem)
+        # Play faster animations that are grouped by outcome number afterwards to show the full distribution
         for elem in backlog:
-                r_v, frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move, elem_to_rv = get_mapping(elem)
-                fast_anims.append((r_v, frame_anim, elem_to_rv))
+                r_v, frame_anim, move_elem_to_below_rv, rule_highlight, outcome_highlight, outcome_overwrite_elem, remove_elem, frame_move, elem_to_rv, darken_element_transform = get_mapping(elem)
+                fast_anims.append((r_v, frame_anim, elem_to_rv, darken_element_transform))
 
         # evaluate all remaining r_v outcomes in the fast_anims buffer, sorted for the sake of looking nice since sets aren't ordered
-        support = list(set([r_v for r_v,fa,etr in fast_anims]))
+        support = list(set([r_v for r_v,fa,etr,dark in fast_anims]))
         support.sort()
 
         # Play the two stages of each of the remaining elements at the same time
         for x in support:
-            frame_anim = [fa  for rv,fa,etr in fast_anims if rv == x]
-            elem_to_RV = [etr for rv,fa,etr in fast_anims if rv == x]
+            frame_anim = [fa   for rv,fa,etr,dark in fast_anims if rv == x]
+            elem_to_RV = [etr  for rv,fa,etr,dark in fast_anims if rv == x]
+            darkenElem = [dark for rv,fa,etr,dark in fast_anims if rv == x]
 
             self.play(*frame_anim)
-            self.play(*elem_to_RV)            
+            self.play(*elem_to_RV, *darkenElem)
         
         self.wait(3)

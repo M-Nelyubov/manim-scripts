@@ -362,7 +362,7 @@ class RollAdvanced(Scene):
         # Draw the pmf table
         t1 = MathTable(
             [[str(s) for s in support], [("\\frac{?}{?}") for _ in support]],
-            row_labels=[MathTex("X"), MathTex("f_X(x)")],
+            row_labels=[MathTex("x"), MathTex("f_X(x)")],
             include_outer_lines=True).scale(1.4/3.0).move_to(DOWN*2 + RIGHT*3)
 
         self.play(Write(t1, run_time=run_time))

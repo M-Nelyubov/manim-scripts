@@ -146,7 +146,7 @@ class MultipleRulesConstSum(Sum):
             return d1 + d2
 
     def label(self):
-        return r"--noColor X(d_1,d_2) = \begin{cases} 3 & d_1 \leq 4 \cap d_2 \leq 4 \\ d_1 + d_2 & \text{else} \end{cases}"
+        return r"--noColor X(d_1,d_2) = \begin{cases} 3 & (d_1 \leq 4) \cap (d_2 \leq 4) \\ d_1 + d_2 & \text{else} \end{cases}"
 
 
 class ConditionalMapping():
@@ -156,7 +156,7 @@ class ConditionalMapping():
     def rv(self, d1, d2): 
         # returns a tuple (r_val : float, rule : int)
         # Random variable - a function of ω = (d1, d2) --> R (r_val)
-        # rule (which entry in the list or rules this corresponds to)
+        # rule (index - which entry in the list or rules this corresponds to)
         pass
 
     def rules(self):
@@ -174,7 +174,7 @@ class ConstOrSum(ConditionalMapping):
     
     def rules(self):
         return [
-            ("3",         r"d_1 \leq 4 \cap d_2 \leq 4"),
+            ("3",         r"(d_1 \leq 4) \cap (d_2 \leq 4)"),
             ("d_1 + d_2", "else")
         ]
 

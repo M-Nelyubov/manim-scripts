@@ -36,54 +36,67 @@ class SupUpperTriangle(ThreeDScene):
         ]
         z_midpoint = (z_range[1] - z_range[0]) / 2
 
-        xy_step = 0.25
+        xy_step = 0.20
         a = xy_step
-        scaling = z_range[1] / (z_range[1]+1) /2
         axes = ThreeDAxes(
             x_range=[-a, 1+a, a], 
             y_range=[-a, 1+a, a],
             z_range=[0,z_range[1]+1,1],
             x_length=3,
             y_length=3,
-            z_length=6
-        )
-        labels = axes.get_axis_labels(
-            Tex("x").scale(0.7), Tex("y").scale(0.45), MathTex("f_{X,Y}(x,y)").scale(0.45)
+            z_length=4
         )
 
+        x_label = Tex('x').scale(0.5)
+        y_label = Tex('y').scale(0.5)# .move_to(axes.c2p(0,1.2,0))
+        z_label = MathTex('f_{XY}(x,y)').scale(0.5)# .move_to(axes.c2p(0,0,7.0))
+
+        # tracker = ValueTracker(0)
+        x_label.add_updater(lambda m: m.move_to(axes.c2p(1+2*a, 0, 0)))
+        y_label.add_updater(lambda m: m.move_to(axes.c2p(0, 1+2*a, 0)))
+        z_label.add_updater(lambda m: m.move_to(axes.c2p(0,  0,  7.0)))
+        labels = VGroup(x_label, y_label, z_label)
+
+        # labels = axes.get_axis_labels(
+        #     Tex("x").scale(0.7), 
+        #     Tex("y").scale(0.7), 
+        #     MathTex("f_{X,Y}(x,y)").scale(0.7)
+        # )
+
+
         distribution_layer = Surface(
-            lambda u, v: np.array([
+            lambda u, v: axes.coords_to_point(
                 u*v,
                 v,
-                v*self.f(u,v) * scaling   # Spaghetti Code
-            ]), v_range=y_supp, u_range=x_supp,
+                v*self.f(u,v)
+            ), v_range=y_supp, u_range=x_supp,
             fill_opacity = 0.5,
             checkerboard_colors=[RED_D, RED_E], resolution=(1, 1)
         )
         base_layer = Surface(
-            lambda u, v: np.array([
+            lambda u, v: axes.c2p(
                 u*v,
                 v,
                 0
-            ]), v_range=y_supp, u_range=x_supp,
+            ), v_range=y_supp, u_range=x_supp,
             fill_opacity = 0.5,
             checkerboard_colors=[RED_D, RED_E], resolution=(1, 1)
         )
         y1_border = Surface(
-            lambda u, v: np.array([
+            lambda u, v: axes.c2p(
                 u,
                 1,
-                v * self.f(u,v) * scaling
-            ]), v_range=y_supp, u_range=x_supp,
+                v * self.f(u,v)
+            ), v_range=y_supp, u_range=x_supp,
             fill_opacity = 0.5,
             checkerboard_colors=[RED_D, RED_E], resolution=(1, 1)
         )
         diag_border = Surface(
-            lambda u, v: np.array([
+            lambda u, v: axes.c2p(
                 u,
                 u,
-                v * self.f(u,v) * scaling
-            ]), v_range=y_supp, u_range=x_supp,
+                v * self.f(u,v)
+            ), v_range=y_supp, u_range=x_supp,
             fill_opacity = 0.5,
             checkerboard_colors=[RED_D, RED_E], resolution=(1, 1)
         )
@@ -95,14 +108,10 @@ class SupUpperTriangle(ThreeDScene):
             y1_border, 
             diag_border
         )
-        geometry.move_to(axes.coords_to_point(
-            (x_supp[1] - x_supp[0]) / 2,
-            (y_supp[1] - y_supp[0]) / 2,
-            z_midpoint
-        )).scale(2)
 
         # self.renderer.camera.light_source.move_to(3*IN) # changes the source of the light
         # self.set_camera_orientation(phi=75 * DEGREES, theta=30 * DEGREES)
+        # self.add_fixed_orientation_mobjects(labels)
         self.play(Write(axes), Write(labels))
         
         self.play(Write(base_layer))
@@ -144,24 +153,22 @@ class SupUpperTriangle(ThreeDScene):
         self.wait(3)
 
         self.move_camera(
-            phi   =  70 * DEGREES, 
-            theta = (360-90-20) * DEGREES, 
+            phi   =  30 * DEGREES, 
+            theta = (360-90-5) * DEGREES, 
             gamma = None,
             frame_center=axes
         )
 
         self.wait(3)
 
-        x=0
+        x=0.8
         cross_section = Surface(
-            lambda u, v: np.array([
-                x,
-                u,
-                v * scaling
-            ]), v_range=[z_range[0]-4, z_range[1]+4], u_range=[-1.5,2.5],
-            fill_opacity = 0.75,
+            lambda u, v: axes.c2p(x, u, v),
+            u_range=[y_supp[0]-.5, y_supp[1]+.5],
+            v_range=[z_range[0]-1, z_range[1]+2], 
+            fill_opacity = 1,
             checkerboard_colors=[YELLOW, YELLOW], resolution=(1, 1)
-        ).move_to(axes.coords_to_point(0, 0.5, z_midpoint))
+        )
 
         self.play(Write(cross_section))
 

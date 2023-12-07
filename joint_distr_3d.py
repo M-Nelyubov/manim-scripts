@@ -7,6 +7,10 @@ class SupUpperTriangle(ThreeDScene):
     def f(self,x,y):
         return 6*x
 
+    def writeFixed(self, mobj):
+        self.add_fixed_in_frame_mobjects(mobj)
+        self.play(Write(mobj))
+
     def construct(self):
         x_supp = [0,1]
         y_supp = [0,1]
@@ -130,7 +134,7 @@ class SupUpperTriangle(ThreeDScene):
         self.move_camera(theta = (t+0) * DEGREES)
         # self.wait()
         # self.move_camera(theta = (t+90) * DEGREES)
-        self.wait(3)
+        self.wait(2)
 
         self.move_camera(
             phi   =  30 * DEGREES, 
@@ -139,7 +143,7 @@ class SupUpperTriangle(ThreeDScene):
             frame_center=axes
         )
 
-        self.wait(3)
+        self.wait(2)
 
         x=0.8
         cross_section = Surface(
@@ -162,24 +166,34 @@ class SupUpperTriangle(ThreeDScene):
 
         self.wait(1)
 
-        slice = Axes([y_supp[0], y_supp[1]+2*a, a], z_range).shift(RIGHT*4).scale(0.5)
-        self.add_fixed_in_frame_mobjects(slice)
-        self.play(Write(slice))
+        slice = Axes([y_supp[0], y_supp[1]+2*a, a], z_range, 
+                    axis_config={"include_numbers": True},
+                ).shift(RIGHT*4).scale(0.5)
+        self.writeFixed(slice)
 
         labels_2d = slice.get_axis_labels(
             MathTex("y").scale(0.5), 
             MathTex("f_{XY}(x="+str(x)+",y)").scale(0.5)
         )
-        self.add_fixed_in_frame_mobjects(labels_2d)
-        self.play(Write(labels_2d))
+        self.writeFixed(labels_2d)
 
         def fy(y):
             if y<x or y>1:
                 return 0
             return self.f(x,y)
         
-        simplified = slice.plot(fy)
-        self.add_fixed_in_frame_mobjects(simplified)
-        self.play(Write(simplified))
+        color = YELLOW
+        under = slice.plot(lambda t: 0, x_range=[0,x], color=color)
+        supported = slice.plot(fy, x_range=[x,1], color=color)
+        over = slice.plot(lambda t: 0, x_range=[1,1.5], color=color)
+        # simplified = VGroup(under, supported, over)
+        # self.add_fixed_in_frame_mobjects(simplified)
+
+        # Draw the three components sequentially
+        self.writeFixed(under)
+        self.wait(0.5)
+        self.writeFixed(supported)
+        self.wait(0.5)
+        self.writeFixed(over)
 
         self.wait(5)

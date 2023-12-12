@@ -149,7 +149,7 @@ class SupUpperTriangle(ThreeDScene):
 
         self.wait(2)
 
-        x=0.8
+        x=0.6
         cross_section = Surface(
             lambda u, v: axes.c2p(x, u, v),
             u_range=[y_supp[0]-.5, y_supp[1]+.5],

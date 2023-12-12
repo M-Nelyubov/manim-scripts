@@ -11,6 +11,10 @@ class SupUpperTriangle(ThreeDScene):
         self.add_fixed_in_frame_mobjects(mobj)
         self.play(Write(mobj))
 
+    def replaceFixed(self, old_mobj, new_mobj):
+        self.add_fixed_in_frame_mobjects(new_mobj)
+        self.play(ReplacementTransform(old_mobj, new_mobj))
+
     def construct(self):
         x_supp = [0,1]
         y_supp = [0,1]
@@ -155,10 +159,71 @@ class SupUpperTriangle(ThreeDScene):
         )
 
         self.play(Write(cross_section))
+       
+        lower_supp = Polyhedron([
+            axes.c2p(0,0,0),  # 0 - origin
+            axes.c2p(0,1,0),  # 1 - upper left  corner of the left trapezoid
+            axes.c2p(x,1,0),  # 2 - upper right corner of the left trapezoid
+            axes.c2p(x,x,0),  # 3 - lower right corner of the left trapezoid
+
+            axes.c2p(x,x,self.f(x,x)), # 4 - lower right peak point
+            axes.c2p(x,1,self.f(x,1))  # 5 - upper right peak point
+        ],[
+            [0,1,2,3],  # lower left support area
+            [0,3,4],    # front face
+            [1,2,5],    # rear face
+            [0,1,5,4]   # top
+        ], graph_config={"vertex_config":{'radius': 0.0001}})
+
+        upper_supp =  Polyhedron([
+            axes.c2p(x,1,0),  # 0 - upper left  corner of the right triangle
+            axes.c2p(x,x,0),  # 1 - lower left  corner of the right triangle
+            axes.c2p(1,1,0),  # 2 - upper right corner of the right triangle
+
+            axes.c2p(x,x,self.f(x,x)), # 3 - lower left peak point
+            axes.c2p(x,1,self.f(x,1)), # 4 - upper left peak point
+            axes.c2p(1,1,self.f(1,1))  # 5 - global peak point
+        ],[
+            [0,1,2],    # upper right support area
+            [1,3,5,2],  # front face
+            [0,4,5,2],  # rear face
+            [3,4,5]     # top
+        ], graph_config={"vertex_config":{'radius': 0.0001}})
+
+        slice =  Polyhedron([
+            axes.c2p(x,1,0),  # 0 - higher base
+            axes.c2p(x,x,0),  # 1 - lower base
+            axes.c2p(x,x,self.f(x,x)), # 2 - lower peak point
+            axes.c2p(x,1,self.f(x,1)) # 3 - upper peak point
+        ],[
+            [0,1,2,3]    # the slice
+        ], graph_config={"vertex_config":{'radius': 0.0001}}).set_color(YELLOW)
+
+        graphs = VGroup(lower_supp, slice, upper_supp)
+        for graph in graphs:
+            graph.set_stroke(width=1)
+
+        self.play(
+            Unwrite(cross_section),
+            Unwrite(geometry),
+            Write(lower_supp),
+            Write(upper_supp),
+            Write(slice)
+        )
 
         self.wait(1)
 
-        model_3d = VGroup(cross_section, axes, labels, geometry)
+        slice.generate_target()
+        slice.target.shift(RIGHT*1)
+
+        upper_supp.generate_target()
+        upper_supp.target.shift(RIGHT*2)
+
+        self.play(MoveToTarget(upper_supp), MoveToTarget(slice))
+
+        self.wait(2)
+
+        model_3d = VGroup(axes, labels, graphs)
 
         model_3d.generate_target()
         model_3d.target.shift(LEFT * 4)
@@ -166,10 +231,14 @@ class SupUpperTriangle(ThreeDScene):
 
         self.wait(1)
 
+        old_slice = slice
+
         slice = Axes([y_supp[0], y_supp[1]+2*a, a], z_range, 
                     axis_config={"include_numbers": True},
                 ).shift(RIGHT*4).scale(0.5)
         self.writeFixed(slice)
+        # self.add_fixed_in_frame_mobjects(slice)
+        # self.play(ReplacementTransform(old_slice, slice))
 
         labels_2d = slice.get_axis_labels(
             MathTex("y").scale(0.5), 
@@ -186,14 +255,39 @@ class SupUpperTriangle(ThreeDScene):
         under = slice.plot(lambda t: 0, x_range=[0,x], color=color)
         supported = slice.plot(fy, x_range=[x,1], color=color)
         over = slice.plot(lambda t: 0, x_range=[1,1.5], color=color)
-        # simplified = VGroup(under, supported, over)
+        new_slice = VGroup(under, supported, over)
         # self.add_fixed_in_frame_mobjects(simplified)
 
         # Draw the three components sequentially
+        # self.add_fixed_in_frame_mobjects(new_slice)
+        # self.play(TransformFromCopy(old_slice, new_slice))
         self.writeFixed(under)
         self.wait(0.5)
         self.writeFixed(supported)
         self.wait(0.5)
         self.writeFixed(over)
 
-        self.wait(5)
+        self.wait(1)
+
+        formular0 = MathTex("x="+str(x)).move_to(LEFT * 4 + UP*3).scale(0.5)
+        self.writeFixed(formular0)
+
+        scale = 6 * x * (1-x)
+
+        formular1 = MathTex("f_{X}("+str(x)+") = \int _{y=-\infty}^{y=\infty} f_{XY}(x="+str(x)+", y) dy = \int _{y="+str(x)+"}^{y=1} 6x dy = 6xy|_{"+str(x)+"}^{1}   =  6("+str(x)+") (1-("+str(x)+")) = "+str(scale))
+        formular1.scale(0.5).move_to(RIGHT *2 +  UP * 3)
+        self.writeFixed(formular1)
+
+        self.wait(3)
+
+        formular2 = MathTex("f_{X}("+str(x)+") ="+str(6 * x * (1-x)))
+        formular2.scale(0.5).move_to(LEFT * 2 +  UP * 3)
+        self.replaceFixed(formular1, formular2)
+
+        self.wait(3)
+ 
+        formular3 = MathTex("f_{Y|x="+str(x)+"}(y) = \\frac{f_{XY}("+str(x)+",y)}{f_X("+str(x)+")} = \\frac{f_{XY}("+str(x)+",y)}{"+str(scale)+"}")
+        formular3.scale(0.5).move_to(RIGHT *3 +  UP * 3)
+        self.writeFixed(formular3)
+
+        self.wait(3)

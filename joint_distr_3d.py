@@ -240,17 +240,19 @@ class SupUpperTriangle(ThreeDScene):
         # self.add_fixed_in_frame_mobjects(slice)
         # self.play(ReplacementTransform(old_slice, slice))
 
-        labels_2d = slice.get_axis_labels(
-            MathTex("y").scale(0.5), 
-            MathTex("f_{XY}(x="+str(x)+",y)").scale(0.5)
-        )
+        x_label = MathTex("y").scale(0.5)
+        y_label = MathTex("f_{XY}(x="+str(x)+",y)").scale(0.5).set_color(YELLOW)
+        labels_2d = slice.get_axis_labels(x_label, y_label)
         self.writeFixed(labels_2d)
 
         def fy(y):
             if y<x or y>1:
                 return 0
             return self.f(x,y)
-        
+
+        def fygx(y,x):
+            return self.f(x,y) / (6*x * (1-x))
+
         color = YELLOW
         under = slice.plot(lambda t: 0, x_range=[0,x], color=color)
         supported = slice.plot(fy, x_range=[x,1], color=color)
@@ -289,5 +291,24 @@ class SupUpperTriangle(ThreeDScene):
         formular3 = MathTex("f_{Y|x="+str(x)+"}(y) = \\frac{f_{XY}("+str(x)+",y)}{f_X("+str(x)+")} = \\frac{f_{XY}("+str(x)+",y)}{"+str(scale)+"}")
         formular3.scale(0.5).move_to(RIGHT *3 +  UP * 3)
         self.writeFixed(formular3)
+
+        self.wait(1)
+
+        # y_label = slice.get_y_axis_label()
+        y2_label = MathTex("f_{Y|x="+str(x)+"}(y)").scale(0.5).set_color(RED)
+        y2_label.next_to(y_label,UP)
+        self.writeFixed(y2_label)
+
+        self.wait(1)
+
+        under2 = slice.plot(lambda t: 0, x_range=[0,x], color=RED)
+        supported2 = slice.plot(lambda y: fygx(y,x), x_range=[x,1], color=RED)
+        over2 = slice.plot(lambda t: 0, x_range=[1,1.5], color=RED)
+
+        self.writeFixed(under2)
+        self.wait(0.5)
+        self.writeFixed(supported2)
+        self.wait(0.5)
+        self.writeFixed(over2)
 
         self.wait(3)

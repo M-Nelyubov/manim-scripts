@@ -149,7 +149,7 @@ class SupUpperTriangle(ThreeDScene):
 
         self.wait(2)
 
-        x=0.6
+        x=0.6   # the value of x at which the support will be cut
         cross_section = Surface(
             lambda u, v: axes.c2p(x, u, v),
             u_range=[y_supp[0]-.5, y_supp[1]+.5],
@@ -160,6 +160,7 @@ class SupUpperTriangle(ThreeDScene):
 
         self.play(Write(cross_section))
        
+        # The upper and lower halves of the support after it is cut at the cross section
         lower_supp = Polyhedron([
             axes.c2p(0,0,0),  # 0 - origin
             axes.c2p(0,1,0),  # 1 - upper left  corner of the left trapezoid
@@ -190,6 +191,7 @@ class SupUpperTriangle(ThreeDScene):
             [3,4,5]     # top
         ], graph_config={"vertex_config":{'radius': 0.0001}})
 
+        # The cross-section is replaced by the support intersect the cross section to get the slice of interest
         slice =  Polyhedron([
             axes.c2p(x,1,0),  # 0 - higher base
             axes.c2p(x,x,0),  # 1 - lower base
@@ -199,10 +201,13 @@ class SupUpperTriangle(ThreeDScene):
             [0,1,2,3]    # the slice
         ], graph_config={"vertex_config":{'radius': 0.0001}}).set_color(YELLOW)
 
+        # Since all of these are by default polygons with non-zero node sizes, 
+        # they need to have node thickness be invisible to still look like the support
         graphs = VGroup(lower_supp, slice, upper_supp)
         for graph in graphs:
             graph.set_stroke(width=1)
 
+        # Replace the functionally defined shape with the slices
         self.play(
             Unwrite(cross_section),
             Unwrite(geometry),
@@ -213,6 +218,7 @@ class SupUpperTriangle(ThreeDScene):
 
         self.wait(1)
 
+        # Move the components of the split shape apart
         slice.generate_target()
         slice.target.shift(RIGHT*1)
 
@@ -223,8 +229,8 @@ class SupUpperTriangle(ThreeDScene):
 
         self.wait(2)
 
+        # Move everything that has been done so far to the left half of the screen to work on the right half for the next stages
         model_3d = VGroup(axes, labels, graphs)
-
         model_3d.generate_target()
         model_3d.target.shift(LEFT * 4)
         self.play(MoveToTarget(model_3d))

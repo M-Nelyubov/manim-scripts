@@ -7,9 +7,10 @@ class SupUpperTriangle(ThreeDScene):
     def f(self,x,y):
         return 6*x
 
-    def writeFixed(self, mobj):
+    def writeFixed(self, mobj, pause_time=0):
         self.add_fixed_in_frame_mobjects(mobj)
         self.play(Write(mobj))
+        self.wait(pause_time)
 
     def replaceFixed(self, old_mobj, new_mobj):
         self.add_fixed_in_frame_mobjects(new_mobj)
@@ -239,17 +240,12 @@ class SupUpperTriangle(ThreeDScene):
 
         old_slice = slice
 
-        slice = Axes([y_supp[0], y_supp[1]+2*a, a], z_range, 
+        marginal_plot = Axes([y_supp[0], y_supp[1]+2*a, a], z_range, 
                     axis_config={"include_numbers": True},
                 ).shift(RIGHT*4).scale(0.5)
-        self.writeFixed(slice)
+        self.writeFixed(marginal_plot)
         # self.add_fixed_in_frame_mobjects(slice)
         # self.play(ReplacementTransform(old_slice, slice))
-
-        x_label = MathTex("y").scale(0.5)
-        y_label = MathTex("f_{XY}(x="+str(x)+",y)").scale(0.5).set_color(YELLOW)
-        labels_2d = slice.get_axis_labels(x_label, y_label)
-        self.writeFixed(labels_2d)
 
         def fy(y):
             if y<x or y>1:
@@ -260,23 +256,29 @@ class SupUpperTriangle(ThreeDScene):
             return self.f(x,y) / (6*x * (1-x))
 
         color = YELLOW
-        under = slice.plot(lambda t: 0, x_range=[0,x], color=color)
-        supported = slice.plot(fy, x_range=[x,1], color=color)
-        over = slice.plot(lambda t: 0, x_range=[1,1.5], color=color)
-        new_slice = VGroup(under, supported, over)
+        x_label = MathTex("y").scale(0.5)
+        y1_label = MathTex("f_{XY}(x="+str(x)+",y)").scale(0.5).set_color(color)
+
+        labels_2d = marginal_plot.get_axis_labels(x_label, y1_label)
+        self.writeFixed(labels_2d)
+
+        und1 = marginal_plot.plot(lambda t: 0, x_range=[0,x], color=color)
+        sup1 = marginal_plot.plot(fy, x_range=[x,1], color=color)
+        auc1 = marginal_plot.get_area(sup1, x_range=[x,1], color=color) # Area under the curve
+        ovr1 = marginal_plot.plot(lambda t: 0, x_range=[1,1.5], color=color)
+        marginal1 = VGroup(y1_label, und1, auc1, ovr1)
         # self.add_fixed_in_frame_mobjects(simplified)
 
         # Draw the three components sequentially
         # self.add_fixed_in_frame_mobjects(new_slice)
         # self.play(TransformFromCopy(old_slice, new_slice))
-        self.writeFixed(under)
+        self.writeFixed(und1, pause_time=0.5)
+        self.writeFixed(auc1, pause_time=0.5)
+        self.writeFixed(ovr1, pause_time=0.5)
+        
         self.wait(0.5)
-        self.writeFixed(supported)
-        self.wait(0.5)
-        self.writeFixed(over)
 
-        self.wait(1)
-
+        # show the constant on the farthest left
         formular0 = MathTex("x="+str(x)).move_to(LEFT * 4 + UP*3).scale(0.5)
         self.writeFixed(formular0)
 
@@ -294,27 +296,43 @@ class SupUpperTriangle(ThreeDScene):
 
         self.wait(3)
  
-        formular3 = MathTex("f_{Y|x="+str(x)+"}(y) = \\frac{f_{XY}("+str(x)+",y)}{f_X("+str(x)+")} = \\frac{f_{XY}("+str(x)+",y)}{"+str(scale)+"}")
+        formular3 = MathTex("f_{Y|x="+str(x)+"}(y)"," = \\frac{f_{XY}("+str(x)+",y)}{f_X("+str(x)+")}"," = \\frac{f_{XY}("+str(x)+",y)}{"+str(scale)+"}")
         formular3.scale(0.5).move_to(RIGHT *3 +  UP * 3)
         self.writeFixed(formular3)
 
         self.wait(1)
 
-        # y_label = slice.get_y_axis_label()
         y2_label = MathTex("f_{Y|x="+str(x)+"}(y)").scale(0.5).set_color(RED)
-        y2_label.next_to(y_label,UP)
+        y2_label.next_to(y1_label,UP)
         self.writeFixed(y2_label)
 
         self.wait(1)
 
-        under2 = slice.plot(lambda t: 0, x_range=[0,x], color=RED)
-        supported2 = slice.plot(lambda y: fygx(y,x), x_range=[x,1], color=RED)
-        over2 = slice.plot(lambda t: 0, x_range=[1,1.5], color=RED)
+        # Darken the existing plot before making the new one
+        graying_actions = []
+        for elem in marginal1:
+            # Create the object
+            darker_elem = elem.copy()
+            darker_elem.color = DARK_GRAY
 
-        self.writeFixed(under2)
-        self.wait(0.5)
-        self.writeFixed(supported2)
-        self.wait(0.5)
-        self.writeFixed(over2)
+            # Actions to add it to the frame
+            self.add_fixed_in_frame_mobjects(darker_elem)
+            darken_element_transform = ReplacementTransform(elem, darker_elem)
+            graying_actions.append(darken_element_transform)
+        self.play(*graying_actions)
+
+        # Draw the normalized marginal distribution for this value of x
+        color = RED
+        und2 = marginal_plot.plot(lambda t: 0, x_range=[0,x], color=color)
+        sup2 = marginal_plot.plot(lambda y: fygx(y,x), x_range=[x,1], color=color)
+        auc2 = marginal_plot.get_area(sup2, x_range=[x,1], color=color)
+        ovr2 = marginal_plot.plot(lambda t: 0, x_range=[1,1.5], color=color)
+
+        self.writeFixed(und2, pause_time=0.5)
+        self.writeFixed(auc2, pause_time=0.5)
+        self.writeFixed(ovr2, pause_time=0.5)
+        
+        final_area_label = Text("Area = 1",color=color).next_to(sup1,UP).scale(0.5)  # draw above the higher support to avoid overlap collisions to clarity
+        self.writeFixed(final_area_label, pause_time=1.0)
 
         self.wait(3)
